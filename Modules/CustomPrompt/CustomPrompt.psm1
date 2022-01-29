@@ -8,13 +8,14 @@
 # Author: James Britton
 #==============================================================================
 
-function prompt
-{
-    Write-Host ""
-    Write-Host ("" + "Current Focus: ["+$($host.UI.RawUI.WindowTitle +"]")) -ForegroundColor Cyan -BackgroundColor Magenta
-    Write-Host ("" + "Current Loc.: ["+$(Get-Location) +"]")`
-    -ForegroundColor Magenta
-    Write-Host "Current time: [$(Get-Date)]" -ForegroundColor Cyan
-    write-host "Current user: [$env:USERNAME]" -ForegroundColor Magenta
-        return " > `$  "
+function prompt{
+    $hostname = hostname
+    Write-Host ("░▒▒▓") -NoNewline -ForegroundColor Magenta
+    Write-Host ("" + " ["+$($host.UI.RawUI.WindowTitle +"]")) -ForegroundColor Cyan -BackgroundColor Magenta -NoNewline
+    Write-Host ("▓▒▒░") -ForegroundColor Magenta
+    Write-Host ("" + " ["+$(Get-Location) +"]").Replace("Microsoft.PowerShell.Core\FileSystem::","[Remote::]") -ForegroundColor Magenta
+    Write-Host " [$(Get-Date)]" -ForegroundColor Cyan -NoNewLine
+    Write-Host " ~" -ForegroundColor White -NoNewLine
+    Write-Host " [$env:USERNAME@$hostname]" -ForegroundColor Magenta
+        return " ->> "
 }
