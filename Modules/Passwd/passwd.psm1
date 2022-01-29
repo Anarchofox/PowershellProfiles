@@ -11,20 +11,22 @@
 #==============================================================================
 
 <# PASSWORD CHANGER #>
-function passwd 
-{
-        # If the arguments are empty, this will exit the script.
-        if ($args.count -lt 1) 
-            {
-                Write-host "Empty arguments. Acceptable format is: passwd <username> <desired password>" -ForegroundColor Red;
-                Break
-            }
-        $userVar = $args[0]; 
-        $passwordVar = $args[1];
+<# WARNING: This script does not use secure-strings or anything like that, it is
+intended explicitly to let the Service Desk operator see, read, confirm, and
+read out to the user their new password in an environment where shoulder-surfing 
+or more exotic surveillance isn't a problem. DO NOT USE in a situation where 
+that sort of thing is an issue, obviously. #>
+
+function passwd {
+    param
+    ([Parameter(Mandatory, HelpMessage = "Enter the user's SAM account name.")]
+        $UserVar,
+        [Parameter(Mandatory, HelpMessage = "Enter the desired password.")]
+        $passwordVar) 
 
     Write-Host "§§ Password Changer §§" -ForegroundColor Magenta
     Write-Host "==================================================================" -ForegroundColor Magenta
-	Write-Host "NOTE: CONFIRM USER IS NOT WORKING FROM HOME!" -ForegroundColor Red
+    Write-Host "NOTE: CONFIRM USER IS NOT WORKING FROM HOME!" -ForegroundColor Red
     Write-Host "Does this look good?" -ForegroundColor Red
     Write-Output $uservar $passwordvar
     Read-Host "Press enter to continue..."
@@ -33,28 +35,28 @@ function passwd
     Write-Host " "
     Write-Host "= Changing user's password =" -ForegroundColor Magenta
     Set-ADAccountPassword -Verbose -Identity $userVar -Reset -NewPassword (ConvertTo-SecureString -AsPlainText "$passwordVar" -Force) -Confirm -ErrorAction Stop; 
-    Start-Sleep 1;
+    Start-Sleep -m 350;
 
     Write-Host " "
     Write-Host "= Setting ChangePasswordAtLogon to true =" -ForegroundColor Magenta
     Set-ADUser -Verbose -Identity $uservar -ChangePasswordAtLogon $true -Confirm; 
-    Start-Sleep 1;
+    Start-Sleep -m 350;
 
     Write-Host " "
     Write-Host "= Enabling user's account =" -ForegroundColor Magenta
     Enable-ADAccount $userVar -Confirm -Verbose; 
-    Start-Sleep 1;
+    Start-Sleep -m 350;
 
-    Get-ADUser $userVar -properties manager,lockedout,emailaddress,PasswordLastSet,AccountExpirationDate
-    $emailName = get-aduser $userVar -Properties DisplayName |Select-Object DisplayName |Format-List
-    Get-ADUser $userVar -properties * |Select-Object Manager, @{Name="ManagerEmail"; Expression={(get-aduser -property emailaddress $_.manager).emailaddress}}
+    Get-ADUser $userVar -properties manager, lockedout, emailaddress, PasswordLastSet, AccountExpirationDate
+    $emailName = get-aduser $userVar -Properties DisplayName | Select-Object DisplayName | Format-List
+    Get-ADUser $userVar -properties * | Select-Object Manager, @{Name = "ManagerEmail"; Expression = { (get-aduser -property emailaddress $_.manager).emailaddress } }
 
     Write-Host "`nEmail for manager:"-ForegroundColor Magenta
-    Write-Host "Hi,`n`nWe've received a request from a user to reset their password. Since the implementation of Self-Service Password Resets, the new policy is that we must pass new passwords onto a user's line manager, superintendent or other organisational superior as listed in Service-Now, and as such we have instructed them to make contact with yourself for the new password.`nPlease see the user's name, username, and new password below."
+    Write-Host "Hi,`n`nWe've received a request from a user to reset their password.`nPlease see the user's name, username, and new password below."
     Write-Output $emailName;
     Write-Host "Username: $userVar`nPassword: $passwordVar`n`nIf you have any difficulties or questions, please contact the Service Desk. We are available 24/7. `n `nThanks, and kind regards,`n `nTechnology Service Desk`n"
     
-<#
+    <#
 .SYNOPSIS
 
 Asks for a username and desired password, then changes the user's password, sets ChangePasswordAtLogon to true, and enables account. Also provides an email to send to the user's line manager.
