@@ -18,13 +18,13 @@ function passgen
     ForEach-Object {
        $WordList = "C:\Temp\wordList.txt" #Here we define the file from which we will source our three words
 
-        $P1 = Get-Content $WordList |Get-Random;  
-        $P2 = Get-Content $WordList |Get-Random;  
-        #$P3 = Get-Content $WordList |Get-Random;  
-        $P4 = Get-Random -Minimum 100 -Maximum 999; 
-        $P5 = Get-Random '!','@','#','$','%','^','&'; 
-        #$P6 = "$P1$P2$P3$P4$P5"; 
-        $P6 = "$P1$P2$P4$P5"; 
+        $P1 = Get-Content $WordList |Get-Random
+        $P2 = Get-Content $WordList |Get-Random
+        #$P3 = Get-Content $WordList |Get-Random
+        $P4 = Get-Random -Minimum 100 -Maximum 999
+        $P5 = Get-Random '!','@','#','$','%','^','&'
+        #$P6 = "$P1$P2$P3$P4$P5"
+        $P6 = "$P1$P2$P4$P5"
     
         Write-Host "Password is: $P6" -ForegroundColor Green
        
